@@ -3,22 +3,30 @@ import Router from 'vue-router'
 import Login from 'components/Login'
 // 导入home组件
 import Home from 'components/Home'
+// 导入Users组件
+import Users from 'components/Users'
 
 Vue.use(Router)
 
 const router = new Router({
-  routes: [{
-    path: '/',
-    redirect: '/login'
-  },
-  {
-    path: '/login',
-    component: Login
-  },
-  {
-    path: '/home',
-    component: Home
-  }
+  routes: [
+    {
+      path: '/',
+      redirect: '/login'
+    },
+    {
+      path: '/login',
+      component: Login
+    },
+    {
+      path: '/home',
+      component: Home,
+      // 用于配置home的子路由
+      children: [{
+        path: '/users',
+        component: Users
+      }]
+    }
   ]
 })
 // 给router对象注册一个导航守卫

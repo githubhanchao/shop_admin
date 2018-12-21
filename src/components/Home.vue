@@ -11,8 +11,63 @@
       </div>
     </el-header>
     <el-container>
-      <el-aside>Aside</el-aside>
-      <el-main>Main</el-main>
+      <!--
+        el-menu: 整个导航菜单组件
+        default-active： 默认激活的菜单
+        background-color： 导航菜单背景色
+        text-color： 文字颜色
+        active-text-color： 激活的文字的颜色
+        unique-opened:只能打开一个子菜单
+        router:是否开启导航模式
+
+        el-submenu： 子菜单
+        template： 指定了子菜单的文本和图标
+
+        el-menu-item-group：菜单项的分组
+        el-menu-item：菜单项
+      -->
+      <el-aside width="200px">
+        <el-menu
+          default-active="1-1"
+          class="el-menu-vertical-demo"
+          background-color="#545c64"
+          text-color="#fff"
+          active-text-color="#ffd04b"
+          unique-opened
+          router
+        >
+          <el-submenu index="1">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>用户管理</span>
+            </template>
+            <!-- 菜单项 -->
+            <el-menu-item index="/users">
+              <i class="el-icon-menu"></i>
+              <span slot="title">用户列表</span>
+            </el-menu-item>
+          </el-submenu>
+          <el-submenu index="2">
+            <template slot="title">
+              <i class="el-icon-location"></i>
+              <span>权限管理</span>
+            </template>
+            <!-- 菜单项 -->
+            <el-menu-item index="2-1">
+              <i class="el-icon-menu"></i>
+              <span slot="title">角色列表</span>
+            </el-menu-item>
+            <el-menu-item index="2-2">
+              <i class="el-icon-menu"></i>
+              <span slot="title">权限列表</span>
+            </el-menu-item>
+          </el-submenu>
+        </el-menu>
+      </el-aside>
+      <el-main>
+        <!-- 现实home的子路由的出口 -->
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -23,24 +78,24 @@ export default {
     return {}
   },
   methods: {
+    // 退出
     logout() {
       this.$confirm('你确定要退出系统吗?', '温馨提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(() => {
-        // 1. 删除localStorage中的myToken
-        localStorage.removeItem('myToken')
-        // 2. 跳转到登录组件
-        this.$router.push('login')
-        // 3. 给一个退出的提示
-        this.$message.success('退出成功了')
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '退出取消了'
-        })
       })
+        .then(() => {
+          // 3. 给一个退出的提示
+          this.$message.success('退出成功')
+          // 1. 删除localStorage中的token
+          localStorage.removeItem('token')
+          // 2. 跳转到登录组件
+          this.$router.push('login')
+        })
+        .catch(() => {
+          this.$message.info('取消成功')
+        })
     }
   }
 }
@@ -88,6 +143,9 @@ export default {
 
   .el-aside {
     background-color: #545c64;
+    .el-submenu {
+      width: 300px;
+    }
   }
 
   .el-main {
