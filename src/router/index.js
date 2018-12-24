@@ -5,7 +5,9 @@ import Login from 'components/Login'
 import Home from 'components/Home'
 // 导入Users组件
 import Users from 'components/Users'
-
+// 导入Rights组件
+import Rights from 'components/Rights'
+import Roles from 'components/Roles'
 Vue.use(Router)
 
 const router = new Router({
@@ -22,10 +24,20 @@ const router = new Router({
       path: '/home',
       component: Home,
       // 用于配置home的子路由
-      children: [{
-        path: '/users',
-        component: Users
-      }]
+      children: [
+        {
+          path: '/users',
+          component: Users
+        },
+        {
+          path: '/rights',
+          component: Rights
+        },
+        {
+          path: '/roles',
+          component: Roles
+        }
+      ]
     }
   ]
 })
