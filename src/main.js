@@ -13,6 +13,11 @@ import '@/assets/base.less'
 
 // 导入axios
 import axios from 'axios'
+// 使用element-tree-grid
+// 1. 引入
+import ElTreeGrid from 'element-tree-grid'
+// 2. 注册为全局的组件 el-table-tree-column支持el-table-column所有属性
+Vue.component('el-table-tree-column', ElTreeGrid)
 
 // 把axios绑定给vue的原型
 Vue.prototype.axios = axios

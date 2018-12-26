@@ -28,7 +28,7 @@
       -->
       <el-aside width="200px">
         <el-menu
-          default-active="1-1"
+          :default-active="$route.path.slice(1)"
           class="el-menu-vertical-demo"
           background-color="#545c64"
           text-color="#fff"
@@ -36,30 +36,15 @@
           unique-opened
           router
         >
-          <el-submenu index="1">
+          <el-submenu v-for="menu in menuList" :key="menu.id" :index="menu.path">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{ menu.authName }}</span>
             </template>
             <!-- 菜单项 -->
-            <el-menu-item index="/users">
+            <el-menu-item v-for="item in menu.children" :key="item.id" :index="item.path">
               <i class="el-icon-menu"></i>
-              <span slot="title">用户列表</span>
-            </el-menu-item>
-          </el-submenu>
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <!-- 菜单项 -->
-            <el-menu-item index="/roles">
-              <i class="el-icon-menu"></i>
-              <span slot="title">角色列表</span>
-            </el-menu-item>
-            <el-menu-item index="/rights">
-              <i class="el-icon-menu"></i>
-              <span slot="title">权限列表</span>
+              <span slot="title">{{ item.authName }}</span>
             </el-menu-item>
           </el-submenu>
         </el-menu>
@@ -75,28 +60,38 @@
 <script>
 export default {
   data() {
-    return {}
+    return {
+      menuList: []
+    }
   },
   methods: {
     // 退出
-    logout() {
-      this.$confirm('你确定要退出系统吗?', '温馨提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      })
-        .then(() => {
-          // 3. 给一个退出的提示
-          this.$message.success('退出成功')
-          // 1. 删除localStorage中的token
-          localStorage.removeItem('token')
-          // 2. 跳转到登录组件
-          this.$router.push('login')
+    async logout() {
+      try {
+        await this.$confirm('你确定要退出系统吗?', '温馨提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
         })
-        .catch(() => {
-          this.$message.info('取消成功')
-        })
+        // 3. 给一个退出的提示
+        this.$message.success('退出成功')
+        // 1. 删除localStorage中的token
+        localStorage.removeItem('token')
+        // 2. 跳转到登录组件
+        this.$router.push('/login')
+      } catch (e) {
+        this.$message.info('取消退出')
+      }
+    },
+    async getMenuList() {
+      let res = await this.axios.get('menus')
+      if (res.meta.status === 200) {
+        this.menuList = res.data
+      }
     }
+  },
+  created() {
+    this.getMenuList()
   }
 }
 </script>

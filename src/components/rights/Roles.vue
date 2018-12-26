@@ -6,6 +6,8 @@
       <el-breadcrumb-item>权限管理</el-breadcrumb-item>
       <el-breadcrumb-item>角色列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 增加按钮 -->
+    <el-button type="success" plain @click="showAddDialog">增加角色</el-button>
     <!-- 表格组件 -->
     <el-table :data="roleList">
       <el-table-column type="expand">
@@ -45,8 +47,14 @@
       <el-table-column label="角色描述" prop="roleDesc"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="{row}">
-          <el-button type="primary" plain icon="el-icon-edit" size="mini"></el-button>
-          <el-button type="danger" plain icon="el-icon-delete" size="mini"></el-button>
+          <el-button
+            type="primary"
+            plain
+            icon="el-icon-edit"
+            size="mini"
+            @click="showEditDialog(row)"
+          ></el-button>
+          <el-button type="danger" @click="delRole(row.id)" plain icon="el-icon-delete" size="mini"></el-button>
           <el-button
             type="success"
             plain
@@ -78,6 +86,25 @@
         <el-button type="primary" @click="assignRight">分 配</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog
+      :title="this.addForm.id ? '修改角色' : '添加角色'"
+      :visible.sync="addDialogVisible"
+      width="40%"
+    >
+      <el-form status-icon ref="addForm" :rules="rules" :model="addForm" label-width="80px">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addForm.roleName" placeholder="请输入角色名称"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述" prop="roleDesc">
+          <el-input v-model="addForm.roleDesc" placeholder="请输入角色描述"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -92,7 +119,21 @@ export default {
         children: 'children',
         label: 'authName'
       },
-      roleId: ''
+      roleId: '',
+      addDialogVisible: false,
+      addForm: {
+        id: '',
+        roleName: '',
+        roleDesc: ''
+      },
+      rules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ],
+        roleDesc: [
+          { required: true, message: '请输入角色描述', trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
@@ -150,13 +191,69 @@ export default {
       let halfCheckedKeys = this.$refs.tree.getHalfCheckedKeys()
       let rids = checkedKeys.concat(halfCheckedKeys).join()
       let res = await this.axios.post(`roles/${this.roleId}/rights`, { rids })
-      let { meta: { status } } = res
+      let {
+        meta: { status }
+      } = res
       if (status === 200) {
         this.getRoleList()
         this.assignDialogVisible = false
         this.$message.success('分配权限成功了')
       } else {
         this.$message.error('分配权限失败了')
+      }
+    },
+    showAddDialog() {
+      this.addDialogVisible = true
+      this.addForm.roleName = ''
+      this.addForm.roleDesc = ''
+      this.addForm.id = ''
+    },
+    saveRole() {
+      // 表单校验
+      this.$refs.addForm.validate(async valid => {
+        if (!valid) return false
+        // 2.发送ajax请求
+        // 请求方式 post  put
+        // 请求地址 'roles'     'roles/id'
+        // 响应结果： 201       200
+        let id = this.addForm.id
+        let method = id ? 'put' : 'post'
+        let url = id ? `roles/${id}` : `roles`
+        let status = id ? 200 : 201
+        let res = await this.axios({
+          method,
+          url,
+          data: this.addForm
+        })
+        if (res.meta.status === status) {
+          this.$refs.addForm.resetFields()
+          this.addDialogVisible = false
+          this.getRoleList()
+          this.$message.success('操作成功')
+        } else {
+          this.$message.error('操作失败')
+        }
+      })
+    },
+    showEditDialog(role) {
+      this.addDialogVisible = true
+      // 回显数据
+      this.addForm.roleName = role.roleName
+      this.addForm.roleDesc = role.roleDesc
+      this.addForm.id = role.id
+    },
+    async delRole(id) {
+      try {
+        await this.$confirm('你确定要删除该角色吗', '温馨提示', {
+          type: 'warning'
+        })
+        let res = await this.axios.delete(`roles/${id}`)
+        if (res.meta.status === 200) {
+          this.getRoleList()
+          this.$message.success('删除成功')
+        }
+      } catch (e) {
+        this.$message.info('取消删除')
       }
     }
   },
