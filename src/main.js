@@ -7,7 +7,7 @@ import router from './router'
 // 导入elementui
 import ElementUI from 'element-ui'
 // 导入elementui的样式
-import 'element-ui/lib/theme-chalk/index.css'
+// import 'element-ui/lib/theme-chalk/index.css'
 // 导入通用样式
 import '@/assets/base.less'
 
