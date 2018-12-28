@@ -11,6 +11,15 @@ import 'element-ui/lib/theme-chalk/index.css'
 // 导入通用样式
 import '@/assets/base.less'
 
+// 导入moment
+import moment from 'moment'
+// 导入vue-quill-editor
+import VueQuillEditor from 'vue-quill-editor'
+// 导入样式文件
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
 // 导入axios
 import axios from 'axios'
 // 使用element-tree-grid
@@ -47,9 +56,13 @@ axios.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+Vue.filter('dateFilter', (input, format = 'YYYY-MM-DD HH:mm:ss') => {
+  return moment(input * 1000).format(format)
+})
 
 // 安装elementui插件
 Vue.use(ElementUI)
+Vue.use(VueQuillEditor)
 
 Vue.config.productionTip = false
 

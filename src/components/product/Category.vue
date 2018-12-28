@@ -1,7 +1,12 @@
 <template>
   <div class="category">
     <el-button type="success" @click="showAddDialog" plain>商品分类</el-button>
-    <el-table :data="categoryList">
+    <el-table
+      v-loading="loading"
+      element-loading-text="拼命加载中..."
+      element-loading-background="rgba(255, 255, 255, 0.8)"
+      :data="categoryList"
+    >
       <!--
         tree-key: 嵌套解析的key 默认id
         childKey: 查找子属性的属性名  默认是children
@@ -28,6 +33,17 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 15, 20]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+      background
+    ></el-pagination>
     <el-dialog title="添加分类" :visible.sync="addDialogVisible" width="40%">
       <el-form status-icon ref="addForm" :rules="rules" :model="addForm" label-width="80px">
         <el-form-item label="分类名称" prop="cat_name">
@@ -60,7 +76,7 @@ export default {
     return {
       categoryList: [],
       currentPage: 1,
-      pageSize: 10,
+      pageSize: 5,
       total: 0,
       addDialogVisible: false,
       addForm: {
@@ -78,11 +94,13 @@ export default {
         cat_name: [
           { required: true, message: '请输入分类名称', trigger: 'blur' }
         ]
-      }
+      },
+      loading: false
     }
   },
   methods: {
     async getCategoryList() {
+      this.loading = true
       let res = await this.axios.get('categories', {
         params: {
           type: 3,
@@ -97,12 +115,13 @@ export default {
       if (status === 200) {
         this.total = total
         this.categoryList = result
+        this.loading = false
       }
     },
     async showAddDialog() {
       this.addDialogVisible = true
       let res = await this.axios.get('categories?type=2')
-      console.log(res)
+      // console.log(res)
 
       if (res.meta.status === 200) {
         this.options = res.data
@@ -134,10 +153,21 @@ export default {
         })
         let res = await this.axios.delete(`categories/${role.cat_id}`)
         if (res.meta.status === 200) {
+          if (this.categoryList.length <= 1 && this.currentPage > 1) {
+            this.currentPage--
+          }
           this.getCategoryList()
           this.$message.success('删除成功')
         }
       } catch (e) {}
+    },
+    handleSizeChange(val) {
+      this.pageSize = val
+      this.getCategoryList()
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val
+      this.getCategoryList()
     }
   },
   created() {
